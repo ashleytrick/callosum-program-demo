@@ -2,11 +2,17 @@
   "name": "Callosum Program",
   "short_name": "Callosum",
   "description": "Your program, in one place.",
-  "start_url": "./",
+  "start_url": ".",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#FBFAFF",
   "theme_color": "#FBFAFF",
-  "icons": [],
-  "scope": "./"
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
 }
