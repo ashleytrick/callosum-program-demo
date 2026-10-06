@@ -1,0 +1,39 @@
+name: Publish Later Today fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publish-later-today-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout demo repo
+        uses: actions/checkout@v4
+
+      - name: Download tested demo build
+        run: |
+          curl -fL 'https://sdmntprwestus.oaiusercontent.com/files/00000000-0c2c-8230-a3d0-97e10ef95d33/raw?se=2026-10-06T16%3A34%3A00Z&sp=r&sv=2026-02-06&sr=b&scid=015eec53-5c31-58be-bc65-17477ce46a09&skoid=89c13f8f-c33a-46d8-9bf3-ad7158c7790a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-06T12%3A19%3A24Z&ske=2026-10-07T12%3A19%3A24Z&sks=b&skv=2026-02-06&sig=e8kbTYzXMFFPZni8Yx7huydYiQwo8Bfvr7BTHbZ1Xn0%3D' -o /tmp/callosum-demo.zip
+          rm -rf /tmp/callosum-demo
+          mkdir -p /tmp/callosum-demo
+          unzip -q /tmp/callosum-demo.zip -d /tmp/callosum-demo
+
+      - name: Replace generated site
+        run: |
+          rm -rf assets fonts
+          rm -f index.html manifest.webmanifest sw.js icon.svg favicon.svg
+          cp -R /tmp/callosum-demo/. .
+          touch .nojekyll
+
+      - name: Commit published build
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Publish Later Today layout fix" || exit 0
+          git push
