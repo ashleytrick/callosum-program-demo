@@ -1,0 +1,38 @@
+name: Publish current Callosum demo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publish-current-demo.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download tested build
+        run: |
+          curl -fL 'https://sdmntprwestus.oaiusercontent.com/files/00000000-a070-8230-8222-4b1f7b0db8d0/raw?se=2026-10-06T16%3A50%3A37Z&sp=r&sv=2026-02-06&sr=b&scid=e3cbaf6f-3692-5523-908f-755c11377fbc&skoid=89c13f8f-c33a-46d8-9bf3-ad7158c7790a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-06T01%3A58%3A17Z&ske=2026-10-07T01%3A58%3A17Z&sks=b&skv=2026-02-06&sig=QtUY0wAhlbySkfEopJKhuc/PaAceUqLDZdfkO9jwmTk%3D' -o /tmp/demo.zip
+          rm -rf /tmp/demo
+          mkdir -p /tmp/demo
+          unzip -q /tmp/demo.zip -d /tmp/demo
+
+      - name: Replace generated site
+        run: |
+          rm -rf assets fonts
+          rm -f index.html manifest.webmanifest sw.js icon.svg favicon.svg
+          cp -R /tmp/demo/. .
+          touch .nojekyll
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Publish current Callosum demo" || exit 0
+          git push
