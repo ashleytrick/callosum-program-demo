@@ -1,0 +1,38 @@
+name: Publish PWA asset pass
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publish-pwa-assets-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download tested demo build
+        run: |
+          curl -fL 'https://sdmntprwestus.oaiusercontent.com/files/00000000-f810-8230-ac8d-eb60be21135b/raw?se=2026-10-06T17%3A18%3A16Z&sp=r&sv=2026-02-06&sr=b&scid=a3614acf-fd2d-552b-8b2e-e786bf91a3bb&skoid=89c13f8f-c33a-46d8-9bf3-ad7158c7790a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-06T01%3A44%3A42Z&ske=2026-10-07T01%3A44%3A42Z&sks=b&skv=2026-02-06&sig=G5CeOnXaQYyM/5pctqhx9%2BZH7Pcwx4i5wx4GwUADA0I%3D' -o /tmp/demo.zip
+          rm -rf /tmp/demo
+          mkdir -p /tmp/demo
+          unzip -q /tmp/demo.zip -d /tmp/demo
+
+      - name: Replace generated site
+        run: |
+          rm -rf assets fonts
+          rm -f index.html manifest.webmanifest sw.js icon.svg             favicon-32.png apple-touch-icon.png icon-192.png icon-512.png             icon-maskable-512.png notification-icon-192.png notification-badge-96.png
+          cp -R /tmp/demo/. .
+          touch .nojekyll
+
+      - name: Commit published build
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Publish PWA asset pass" || exit 0
+          git push
