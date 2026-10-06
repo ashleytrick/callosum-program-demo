@@ -1,0 +1,12 @@
+{
+  "name": "Callosum Program",
+  "short_name": "Callosum",
+  "description": "Your program, in one place.",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FBFAFF",
+  "theme_color": "#FBFAFF",
+  "icons": [],
+  "scope": "./"
+}
