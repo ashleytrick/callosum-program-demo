@@ -1,0 +1,39 @@
+name: Publish resilience pass
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publish-resilience-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download and verify tested build
+        run: |
+          curl -fL 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-d704-81fd-a8d7-91298a5cf3e3/raw?se=2026-10-06T17%3A46%3A32Z&sp=r&sv=2026-02-06&sr=b&scid=e39f80eb-f0ce-5cdd-9957-0958d4b5c670&skoid=89c13f8f-c33a-46d8-9bf3-ad7158c7790a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-06T01%3A53%3A47Z&ske=2026-10-07T01%3A53%3A47Z&sks=b&skv=2026-02-06&sig=Cu0MJf36GgIXgT0kCx0SB3%2B2ryvXIuElg/sFTWacELI%3D' -o /tmp/demo.zip
+          echo '92b29f9f924fa9065a45e9e3c4a4a4b42a4c1e56d83f1f90bd0d5d34d42840b3  /tmp/demo.zip' | sha256sum -c -
+          rm -rf /tmp/demo
+          mkdir -p /tmp/demo
+          unzip -q /tmp/demo.zip -d /tmp/demo
+
+      - name: Replace generated site
+        run: |
+          rm -rf assets fonts
+          find . -maxdepth 1 -type f ! -name README.md ! -name .nojekyll -delete
+          cp -R /tmp/demo/. .
+          touch .nojekyll
+
+      - name: Commit published build
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Publish storage and SW resilience pass" || exit 0
+          git push
